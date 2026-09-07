@@ -1,0 +1,96 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+env.bak/
+venv.bak/
+venvd/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Testing, coverage, and type checking
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.pyre/
+
+# Logs and local runtime files
+*.log
+logs/
+*.pid
+
+# Data-engineering generated data
+# Keep directory structure with a .gitkeep file when needed.
+data/raw/*
+data/interim/*
+data/processed/*
+data/external/*
+*.csv
+*.tsv
+*.parquet
+*.jsonl
+*.avro
+*.orc
+
+# Local databases and warehouse files
+*.db
+*.sqlite
+*.sqlite3
+*.duckdb
+*.duckdb.wal
+*.duckdb.tmp
+
+# Airflow and orchestration artifacts
+airflow.cfg
+airflow.db
+airflow_home/
+dags/__pycache__/
+
+# Spark and distributed-compute outputs
+spark-warehouse/
+checkpoint/
+checkpoints/
+
+# IDE and OS files
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
