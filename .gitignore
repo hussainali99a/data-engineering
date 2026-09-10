@@ -94,3 +94,6 @@ checkpoints/
 *.swo
 .DS_Store
 Thumbs.db
+
+
+airflow/plugins/

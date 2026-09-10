@@ -1,0 +1,122 @@
+services:
+
+  airflow-postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - airflow_postgres_data:/var/lib/postgresql/data
+    networks:
+      - taxi-data-engineering_default
+
+  airflow-init:
+    # image: apache/airflow:3.3.1
+    build:
+      context: .
+      dockerfile: airflow/Dockerfile
+    depends_on:
+      - airflow-postgres
+    environment:
+
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres:5432/airflow
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-api-server:8080/execution/
+      AIRFLOW__CORE__EXECUTION_API_SERVER_AUTH_BACKEND: airflow.providers.simple_auth_manager.api_fastapi.auth_manager.SimpleAuthManager
+      AIRFLOW__API_AUTH__JWT_SECRET: "taxi-airflow-local-jwt-secret-change-this"
+
+    networks:
+      - taxi-data-engineering_default
+    command:
+      - bash
+      - -c
+      - |
+        airflow db migrate
+
+  airflow-api-server:
+    # image: apache/airflow:3.3.1
+    build:
+      context: .
+      dockerfile: airflow/Dockerfile
+    depends_on:
+      - airflow-postgres
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres:5432/airflow
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-api-server:8080/execution/
+      AIRFLOW__CORE__EXECUTION_API_SERVER_AUTH_BACKEND: airflow.providers.simple_auth_manager.api_fastapi.auth_manager.SimpleAuthManager
+      AIRFLOW__API_AUTH__JWT_SECRET: "taxi-airflow-local-jwt-secret-change-this"
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./:/opt/airflow/project
+    networks:
+      - taxi-data-engineering_default
+    ports:
+      - "8080:8080"
+    command:
+      - api-server
+
+  airflow-scheduler:
+
+    # image: apache/airflow:3.3.1
+    build:
+      context: .
+      dockerfile: airflow/Dockerfile
+    depends_on:
+      - airflow-postgres
+      - airflow-api-server
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres:5432/airflow
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-api-server:8080/execution/
+      AIRFLOW__CORE__EXECUTION_API_SERVER_AUTH_BACKEND: airflow.providers.simple_auth_manager.api_fastapi.auth_manager.SimpleAuthManager
+      AIRFLOW__API_AUTH__JWT_SECRET: "taxi-airflow-local-jwt-secret-change-this"
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: taxi_data
+      DB_USER: data_engineer
+      DB_PASSWORD: data_engineering
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./:/opt/airflow/project
+    networks:
+      - taxi-data-engineering_default
+    command:
+      - scheduler
+
+  airflow-dag-processor:
+    # image: apache/airflow:3.3.1
+    build:
+      context: .
+      dockerfile: airflow/Dockerfile
+    depends_on:
+      - airflow-postgres
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres:5432/airflow
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-api-server:8080/execution/
+      AIRFLOW__CORE__EXECUTION_API_SERVER_AUTH_BACKEND: airflow.providers.simple_auth_manager.api_fastapi.auth_manager.SimpleAuthManager
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: taxi_data
+      DB_USER: data_engineer
+      DB_PASSWORD: data_engineering
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./:/opt/airflow/project
+    networks:
+      - taxi-data-engineering_default
+    command:
+      - dag-processor
+
+volumes:
+  airflow_postgres_data:
+
+networks:
+  taxi-data-engineering_default:
+    external: true
+
